@@ -6,8 +6,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,19 +35,33 @@ val sampleRecipes = listOf(
 @Composable
 fun GRecipeListScreen() {
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
-
     if (selectedRecipe == null) {
-        LazyColumn(modifier = Modifier.padding(16.dp)) {
-            items(sampleRecipes) { recipe ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { selectedRecipe = recipe }
+        Scaffold(
+            topBar = { GRecipeTopAppBar(title = "Recipes") },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { /* TODO: Add recipe action */ }
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = recipe.title, style = MaterialTheme.typography.titleLarge)
-                        Text(text = recipe.description, style = MaterialTheme.typography.bodyMedium)
+                    Icon(Icons.Default.Add, contentDescription = "Add Recipe")
+                }
+            }
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .padding(16.dp)
+            ) {
+                items(sampleRecipes) { recipe ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .clickable { selectedRecipe = recipe }
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(text = recipe.title, style = MaterialTheme.typography.titleLarge)
+                            Text(text = recipe.description, style = MaterialTheme.typography.bodyMedium)
+                        }
                     }
                 }
             }
