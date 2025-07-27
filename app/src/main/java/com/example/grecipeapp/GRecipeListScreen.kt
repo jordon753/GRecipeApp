@@ -1,82 +1,130 @@
 package com.example.grecipeapp
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.grecipeapp.ui.theme.GRecipeAppTheme
+import com.example.grecipeapp.Database.GRecipeDatabase
+import com.example.grecipeapp.Database.Recipe
+import com.example.grecipeapp.Database.RecipeRepository
+import com.example.grecipeapp.Database.RecipeViewModel
+import com.example.grecipeapp.Database.RecipeViewModelFactory
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-data class Recipe(val title: String, val description: String)
 
-val sampleRecipes = listOf(
-    Recipe("Spaghetti", "Simple spaghetti with tomato sauce."),
-    Recipe("Pancakes", "Fluffy pancakes with maple syrup."),
-    Recipe("Salad", "Healthy green salad with olive oil.")
-)
 
 @Composable
-fun GRecipeListScreen() {
-    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
-    if (selectedRecipe == null) {
-        Scaffold(
-            topBar = { GRecipeTopAppBar(title = "Recipes") },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { /* TODO: Add recipe action */ }
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Recipe")
-                }
-            }
-        ) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp)
+fun RecipeListScreen() {
+    val context = LocalContext.current
+
+    // Setup DAO → Repository → ViewModel
+    val dao = GRecipeDatabase.getDatabase(context).recipeDao()
+    val repository = RecipeRepository(dao)
+    val viewModel: RecipeViewModel = viewModel(
+        factory = RecipeViewModelFactory(repository)
+    )
+
+    val recipes by viewModel.allRecipes.observeAsState(emptyList())
+    var showDialog by remember { mutableStateOf(false) }
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
-                items(sampleRecipes) { recipe ->
+                Text("+")
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Recipe List",
+                style = MaterialTheme.typography.headlineMedium
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn {
+                items(recipes) { recipe ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .clickable { selectedRecipe = recipe }
+                            .padding(vertical = 4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = recipe.title, style = MaterialTheme.typography.titleLarge)
-                            Text(text = recipe.description, style = MaterialTheme.typography.bodyMedium)
+                            Text(text = recipe.title, style = MaterialTheme.typography.titleMedium)
+                            recipe.description?.let {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(text = it, style = MaterialTheme.typography.bodyMedium)
+                            }
                         }
                     }
                 }
             }
         }
-    } else {
-        RecipeDetailScreen(recipe = selectedRecipe!!) {
-            selectedRecipe = null
-        }
+    }
+
+    // Simple add recipe dialog
+    if (showDialog) {
+        AddRecipeDialog(
+            onDismiss = { showDialog = false },
+            onAddRecipe = { title, description ->
+                val newRecipe = Recipe(title = title, description = description)
+                viewModel.insert(newRecipe)
+                Toast.makeText(context, "Recipe added", Toast.LENGTH_SHORT).show()
+                showDialog = false
+            }
+        )
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun RecipeListPreview() {
-    GRecipeAppTheme {
-        GRecipeListScreen()
-    }
+fun AddRecipeDialog(onDismiss: () -> Unit, onAddRecipe: (String, String?) -> Unit) {
+    var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = {
+                if (title.isNotBlank()) {
+                    onAddRecipe(title, description.ifBlank { null })
+                }
+            }) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        title = { Text("Add Recipe") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Title") }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description (optional)") }
+                )
+            }
+        }
+    )
 }

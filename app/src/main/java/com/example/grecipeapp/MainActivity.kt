@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.grecipeapp.ui.theme.GRecipeAppTheme
-import com.example.recipeapp.HomeScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,10 +23,11 @@ class MainActivity : ComponentActivity() {
                     if (showHome) {
                         HomeScreen(onStartClick = { showHome = false })
                     } else {
-                        GRecipeListScreen()
+                        RecipeListScreen()
                     }
                 }
             }
         }
     }
 }
+
