@@ -14,6 +14,14 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
     fun insert(recipe: Recipe) = viewModelScope.launch {
         repository.insert(recipe)
     }
+    fun update(recipe: Recipe) = viewModelScope.launch {
+        repository.update(recipe)
+    }
+
+    fun delete(recipe: Recipe) = viewModelScope.launch {
+        repository.delete(recipe)
+    }
+
 }
 
 class RecipeViewModelFactory(private val repository: RecipeRepository) : ViewModelProvider.Factory {
