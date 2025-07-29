@@ -12,6 +12,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -35,22 +38,36 @@ import com.example.grecipeapp.Database.RecipeViewModel
 import com.example.grecipeapp.Database.RecipeViewModelFactory
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeListScreen() {
     val context = LocalContext.current
     val dao = GRecipeDatabase.getDatabase(context).recipeDao()
     val repository = RecipeRepository(dao)
-    val viewModel: RecipeViewModel = viewModel(
-        factory = RecipeViewModelFactory(repository)
-    )
-    val recipes by viewModel.allRecipes.observeAsState(emptyList())
+    val viewModel: RecipeViewModel = viewModel(factory = RecipeViewModelFactory(repository))
+
+    val allRecipes by viewModel.allRecipes.observeAsState(emptyList())
     var showDialog by remember { mutableStateOf(false) }
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
+    var selectedCategory by remember { mutableStateOf("All") }
+    var expanded by remember { mutableStateOf(false) }
+
+    // Dynamically collect all categories from current recipes
+    val categories = remember(allRecipes) {
+        val catList = allRecipes.mapNotNull { it.category }.toSet().toMutableList()
+        catList.sort()
+        listOf("All") + catList
+    }
+
+    val filteredRecipes = if (selectedCategory == "All") allRecipes
+    else allRecipes.filter {
+        it.category == selectedCategory
+    }
 
     selectedRecipe?.let { recipe ->
         RecipeDetailScreen(
             recipe = recipe,
-            onBack = { selectedRecipe = null }, // Back resets selection
+            onBack = { selectedRecipe = null },
             onDelete = {
                 viewModel.delete(it)
                 selectedRecipe = null
@@ -64,41 +81,64 @@ fun RecipeListScreen() {
     }
 
     Scaffold(
-        topBar = { GRecipeTopAppBar(title = "Recipe List") },
+        topBar = { GRecipeTopAppBar(title = "GRecipeApp") },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
+            FloatingActionButton(onClick = { showDialog = true }) {
                 Text("+")
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Recipe List",
-                style = MaterialTheme.typography.headlineMedium
-            )
+        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+            Text("Filter by Category", style = MaterialTheme.typography.titleMedium)
+
+            // Category Filter Dropdown
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = selectedCategory,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Category") },
+                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    categories.forEach { category ->
+                        DropdownMenuItem(
+                            text = { Text(category) },
+                            onClick = {
+                                selectedCategory = category
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn {
-                items(recipes) { recipe ->
+                items(filteredRecipes) { recipe ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
-                            .clickable { selectedRecipe = recipe } // 👉 Handle click
+                            .clickable { selectedRecipe = recipe }
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = recipe.title, style = MaterialTheme.typography.titleMedium)
+                            Text(recipe.title, style = MaterialTheme.typography.titleMedium)
                             recipe.description?.let {
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(text = it, style = MaterialTheme.typography.bodyMedium)
+                                Text(it, style = MaterialTheme.typography.bodyMedium)
+                            }
+                            recipe.category?.let {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text("Category: $it", style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
@@ -110,15 +150,16 @@ fun RecipeListScreen() {
     if (showDialog) {
         AddRecipeDialog(
             onDismiss = { showDialog = false },
-            onAddRecipe = { title, description ->
-                val newRecipe = Recipe(title = title, description = description)
-                viewModel.insert(newRecipe)
+            onAdd = { title, description, category ->
+                viewModel.insert(Recipe(title = title, description = description, category = category))
                 Toast.makeText(context, "Recipe added", Toast.LENGTH_SHORT).show()
                 showDialog = false
-            }
+            },
+            categorySuggestions = categories.filter{it!="All"}
         )
     }
 }
+
 
 
 @Composable

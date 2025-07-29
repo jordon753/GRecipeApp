@@ -34,7 +34,7 @@ fun HomeScreen(onStartClick: () -> Unit) {
         ) {
             // Logo at the top
             Image(
-                painter = painterResource(id = R.drawable.logo), // Make sure logo is in res/drawable
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "App Logo",
                 modifier = Modifier
                     .height(200.dp)
