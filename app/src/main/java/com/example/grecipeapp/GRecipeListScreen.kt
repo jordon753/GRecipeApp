@@ -46,14 +46,15 @@ fun RecipeListScreen() {
     val dao = GRecipeDatabase.getDatabase(context).recipeDao()
     val repository = RecipeRepository(dao)
     val viewModel: RecipeViewModel = viewModel(factory = RecipeViewModelFactory(repository))
-
     val allRecipes by viewModel.allRecipes.observeAsState(emptyList())
     var showDialog by remember { mutableStateOf(false) }
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
     var selectedCategory by remember { mutableStateOf("All") }
     var expanded by remember { mutableStateOf(false) }
-
     var showManageDialog by remember { mutableStateOf(false) }
+    var showDeleteRecipeDialog by remember { mutableStateOf(false) }
+    var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
+
 
     // Dynamically collect all categories from current recipes
     val categories = remember(allRecipes) {
@@ -72,8 +73,8 @@ fun RecipeListScreen() {
             recipe = recipe,
             onBack = { selectedRecipe = null },
             onDelete = {
-                viewModel.delete(it)
-                selectedRecipe = null
+                recipeToDelete = it
+                showDeleteRecipeDialog = true
             },
             onUpdate = {
                 viewModel.update(it)
@@ -153,6 +154,35 @@ fun RecipeListScreen() {
             }
         }
     }
+    if (showDeleteRecipeDialog && recipeToDelete != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteRecipeDialog = false
+                recipeToDelete = null
+            },
+            title = { Text("Delete Recipe") },
+            text = { Text("Are you sure you want to delete \"${recipeToDelete?.title}\"?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    recipeToDelete?.let { viewModel.delete(it) }
+                    Toast.makeText(context, "Recipe deleted", Toast.LENGTH_SHORT).show()
+                    showDeleteRecipeDialog = false
+                    recipeToDelete = null
+                    selectedRecipe = null
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteRecipeDialog = false
+                    recipeToDelete = null
+                }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
     if (showManageDialog) {
         CategoryManagementDialog(
             allRecipes = allRecipes,
@@ -178,17 +208,24 @@ fun RecipeListScreen() {
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddRecipeDialog(onDismiss: () -> Unit, onAddRecipe: (String, String?) -> Unit) {
+fun AddRecipeDialog(
+    onDismiss: () -> Unit,
+    onAdd: (String, String?, String?) -> Unit,
+    categorySuggestions: List<String>
+) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(onClick = {
                 if (title.isNotBlank()) {
-                    onAddRecipe(title, description.ifBlank { null })
+                    onAdd(title, description.ifBlank { null }, category.ifBlank { null })
                 }
             }) {
                 Text("Add")
@@ -213,8 +250,33 @@ fun AddRecipeDialog(onDismiss: () -> Unit, onAddRecipe: (String, String?) -> Uni
                     onValueChange = { description = it },
                     label = { Text("Description (optional)") }
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = category,
+                        onValueChange = { category = it },
+                        label = { Text("Category (optional)") },
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        categorySuggestions.forEach { suggestion ->
+                            DropdownMenuItem(
+                                text = { Text(suggestion) },
+                                onClick = {
+                                    category = suggestion
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     )
 }
-

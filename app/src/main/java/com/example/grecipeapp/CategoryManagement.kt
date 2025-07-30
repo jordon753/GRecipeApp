@@ -2,6 +2,8 @@ package com.example.grecipeapp
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -31,7 +33,9 @@ fun CategoryManagementDialog(
     }
 
     var showRenameDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var categoryToRename by remember { mutableStateOf("") }
+    var categoryToDelete by remember { mutableStateOf("") }
     var newCategoryName by remember { mutableStateOf("") }
 
     AlertDialog(
@@ -53,9 +57,13 @@ fun CategoryManagementDialog(
                         }) {
                             Text("Rename")
                         }
-                        TextButton(onClick = { onDeleteCategory(category) }) {
+                        TextButton(onClick = {
+                            categoryToDelete = category
+                            showDeleteConfirmDialog = true
+                        }) {
                             Text("Delete")
                         }
+
                     }
                 }
             }
@@ -66,6 +74,17 @@ fun CategoryManagementDialog(
         AlertDialog(
             onDismissRequest = { showRenameDialog = false },
             title = { Text("Rename Category") },
+            text = {
+                Column {
+                    Text("Current: $categoryToRename")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = newCategoryName,
+                        onValueChange = { newCategoryName = it },
+                        label = { Text("New Category Name") }
+                    )
+                }
+            },
             confirmButton = {
                 TextButton(onClick = {
                     if (newCategoryName.isNotBlank()) {
@@ -80,15 +99,29 @@ fun CategoryManagementDialog(
                 TextButton(onClick = { showRenameDialog = false }) {
                     Text("Cancel")
                 }
-            },
+            }
+        )
+    }
+
+    // Delete Confirmation Dialog
+    if (showDeleteConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmDialog = false },
+            title = { Text("Confirm Delete") },
             text = {
-                Column {
-                    Text("Current: $categoryToRename")
-                    OutlinedTextField(
-                        value = newCategoryName,
-                        onValueChange = { newCategoryName = it },
-                        label = { Text("New Category Name") }
-                    )
+                Text("Are you sure you want to delete the category \"$categoryToDelete\"?\nThis will remove the category from associated recipes.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDeleteCategory(categoryToDelete)
+                    showDeleteConfirmDialog = false
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmDialog = false }) {
+                    Text("Cancel")
                 }
             }
         )
