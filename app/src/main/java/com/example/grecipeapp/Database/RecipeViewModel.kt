@@ -22,6 +22,19 @@ class RecipeViewModel(private val repository: RecipeRepository) : ViewModel() {
         repository.delete(recipe)
     }
 
+    fun renameCategory(old: String, new: String) = viewModelScope.launch {
+        val updatedRecipes = repository.getAllRecipes().filter { it.category == old }
+            .map { it.copy(category = new) }
+        updatedRecipes.forEach { repository.update(it) }
+    }
+
+    fun deleteCategory(category: String) = viewModelScope.launch {
+        val updatedRecipes = repository.getAllRecipes().filter { it.category == category }
+            .map { it.copy(category = null) }
+        updatedRecipes.forEach { repository.update(it) }
+    }
+
+
 }
 
 class RecipeViewModelFactory(private val repository: RecipeRepository) : ViewModelProvider.Factory {

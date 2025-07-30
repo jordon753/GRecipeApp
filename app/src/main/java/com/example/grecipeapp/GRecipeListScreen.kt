@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -51,6 +52,8 @@ fun RecipeListScreen() {
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
     var selectedCategory by remember { mutableStateOf("All") }
     var expanded by remember { mutableStateOf(false) }
+
+    var showManageDialog by remember { mutableStateOf(false) }
 
     // Dynamically collect all categories from current recipes
     val categories = remember(allRecipes) {
@@ -89,7 +92,11 @@ fun RecipeListScreen() {
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(16.dp)) {
+            TextButton(onClick = { showManageDialog = true }) {
+                Text("Manage Categories")
+            }
             Text("Filter by Category", style = MaterialTheme.typography.titleMedium)
+
 
             // Category Filter Dropdown
             ExposedDropdownMenuBox(
@@ -146,6 +153,14 @@ fun RecipeListScreen() {
             }
         }
     }
+    if (showManageDialog) {
+        CategoryManagementDialog(
+            allRecipes = allRecipes,
+            onRenameCategory = { old, new -> viewModel.renameCategory(old, new) },
+            onDeleteCategory = { toDelete -> viewModel.deleteCategory(toDelete) },
+            onDismiss = { showManageDialog = false }
+        )
+    }
 
     if (showDialog) {
         AddRecipeDialog(
@@ -157,6 +172,7 @@ fun RecipeListScreen() {
             },
             categorySuggestions = categories.filter{it!="All"}
         )
+
     }
 }
 
