@@ -79,7 +79,8 @@ fun RecipeListScreen() {
             onUpdate = {
                 viewModel.update(it)
                 selectedRecipe = null
-            }
+            },
+            categorySuggestions = categories.filter { it != "All" }
         )
         return
     }

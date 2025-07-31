@@ -52,7 +52,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -68,16 +70,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.grecipeapp.Database.Recipe
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailScreen(
     recipe: Recipe,
     onBack: () -> Unit,
     onDelete: (Recipe) -> Unit,
-    onUpdate: (Recipe) -> Unit
+    onUpdate: (Recipe) -> Unit,
+    categorySuggestions: List<String>
 ) {
     var isEditing by remember { mutableStateOf(false) }
     var updatedTitle by remember { mutableStateOf(recipe.title) }
     var updatedDescription by remember { mutableStateOf(recipe.description ?: "") }
+    var selectedCategory by remember { mutableStateOf(recipe.category ?: "") }
+    var categoryDropdownExpanded by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -106,58 +113,124 @@ fun RecipeDetailScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Category Dropdown Field
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ExposedDropdownMenuBox(
+                        expanded = categoryDropdownExpanded,
+                        onExpandedChange = { categoryDropdownExpanded = !categoryDropdownExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedCategory,
+                            onValueChange = {
+                                selectedCategory = it
+                            },
+                            label = { Text("Category") },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = categoryDropdownExpanded,
+                            onDismissRequest = { categoryDropdownExpanded = false }
+                        ) {
+                            categorySuggestions.distinct().forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(category) },
+                                    onClick = {
+                                        selectedCategory = category
+                                        categoryDropdownExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(onClick = {
-                        if (updatedTitle.isNotBlank()) {
-                            onUpdate(
-                                recipe.copy(
-                                    title = updatedTitle,
-                                    description = updatedDescription.ifBlank { null }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            if (updatedTitle.isNotBlank()) {
+                                onUpdate(
+                                    recipe.copy(
+                                        title = updatedTitle.trim(),
+                                        description = updatedDescription.trim().ifBlank { null },
+                                        category = selectedCategory.trim().ifBlank { null }
+                                    )
                                 )
-                            )
-                            Toast.makeText(context, "Recipe updated", Toast.LENGTH_SHORT).show()
-                            isEditing = false
-                        } else {
-                            Toast.makeText(context, "Title can't be empty", Toast.LENGTH_SHORT).show()
-                        }
-                    }) {
+                                Toast.makeText(context, "Recipe updated", Toast.LENGTH_SHORT).show()
+                                isEditing = false
+                            } else {
+                                Toast.makeText(context, "Title can't be empty", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
                         Text("Save")
                     }
 
-                    OutlinedButton(onClick = { isEditing = false }) {
+                    OutlinedButton(
+                        onClick = { isEditing = false },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
                         Text("Cancel")
                     }
                 }
+
             } else {
                 Text(recipe.title, style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(recipe.description ?: "No description", style = MaterialTheme.typography.bodyLarge)
+                if (!recipe.category.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Category: ${recipe.category}", style = MaterialTheme.typography.bodyMedium)
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(onClick = { isEditing = true }) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { isEditing = true },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
                         Text("Edit")
                     }
-                    OutlinedButton(onClick = {
-                        onDelete(recipe)
-                        Toast.makeText(context, "Recipe deleted", Toast.LENGTH_SHORT).show()
-                        onBack()
-                    }) {
-                        Text("Delete")
+
+                    OutlinedButton(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
+                        Text("Back")
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedButton(onClick = onBack) {
-                    Text("Back")
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = {
+                            onDelete(recipe)
+                            Toast.makeText(context, "Recipe deleted", Toast.LENGTH_SHORT).show()
+                            onBack()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                    ) {
+                        Text("Delete")
+                    }
                 }
             }
         }
