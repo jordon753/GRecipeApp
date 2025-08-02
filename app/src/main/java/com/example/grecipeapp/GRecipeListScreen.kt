@@ -10,14 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -207,77 +205,3 @@ fun RecipeListScreen() {
     }
 }
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddRecipeDialog(
-    onDismiss: () -> Unit,
-    onAdd: (String, String?, String?) -> Unit,
-    categorySuggestions: List<String>
-) {
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            Button(onClick = {
-                if (title.isNotBlank()) {
-                    onAdd(title, description.ifBlank { null }, category.ifBlank { null })
-                }
-            }) {
-                Text("Add")
-            }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        },
-        title = { Text("Add Recipe") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Title") }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Description (optional)") }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = category,
-                        onValueChange = { category = it },
-                        label = { Text("Category (optional)") },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        categorySuggestions.forEach { suggestion ->
-                            DropdownMenuItem(
-                                text = { Text(suggestion) },
-                                onClick = {
-                                    category = suggestion
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    )
-}

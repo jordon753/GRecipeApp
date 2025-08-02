@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddRecipeDialog(
-    onAdd: (String, String, String) -> Unit,
     onDismiss: () -> Unit,
+    onAdd: (String, String?, String?) -> Unit,
     categorySuggestions: List<String>
 ) {
     var title by remember { mutableStateOf("") }
@@ -39,12 +39,15 @@ fun AddRecipeDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            OutlinedButton(onClick = {
-                if (title.isNotBlank() && category.isNotBlank()) {
-                    onAdd(title, description, category)
+            Button(onClick = {
+                if (title.isNotBlank()) {
+                    onAdd(title, description.ifBlank { null }, category.ifBlank { null })
                 } else {
-                    // Show toast if title or category is empty
-                    Toast.makeText(context, "Title and Category cannot be empty", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Title cannot be empty",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }) {
                 Text("Add")
@@ -64,46 +67,38 @@ fun AddRecipeDialog(
                     label = { Text("Title") }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description") }
+                    label = { Text("Description (optional)") }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onExpandedChange = { expanded = !expanded },
-                    modifier = Modifier.fillMaxWidth()
+                    onExpandedChange = { expanded = !expanded }
                 ) {
                     OutlinedTextField(
                         value = category,
-                        onValueChange = {
-                            category = it
-                        },
-                        label = { Text("Category") },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+                        onValueChange = { category = it },
+                        label = { Text("Category (optional)") },
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
                     )
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        categorySuggestions.forEach {
+                        categorySuggestions.forEach { suggestion ->
                             DropdownMenuItem(
-                                text = { Text(it) },
+                                text = { Text(suggestion) },
                                 onClick = {
-                                    category = it
+                                    category = suggestion
                                     expanded = false
                                 }
                             )
                         }
                     }
                 }
-
             }
         }
     )
 }
-
