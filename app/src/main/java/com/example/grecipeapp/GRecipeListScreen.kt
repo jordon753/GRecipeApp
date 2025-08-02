@@ -165,6 +165,7 @@ fun RecipeListScreen() {
             text = { Text("Are you sure you want to delete \"${recipeToDelete?.title}\"?") },
             confirmButton = {
                 TextButton(onClick = {
+
                     recipeToDelete?.let { viewModel.delete(it) }
                     Toast.makeText(context, "Recipe deleted", Toast.LENGTH_SHORT).show()
                     showDeleteRecipeDialog = false
