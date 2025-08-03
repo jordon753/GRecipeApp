@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.grecipeapp"
+    namespace = "com.gordon.grecipeapp"
     compileSdk = 36
 
     defaultConfig {
@@ -77,6 +77,7 @@ dependencies {
     // Unit and Instrumentation Testing
     testImplementation ("junit:junit:4.13.2")
     androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation ("androidx.test:core:1.5.0")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
 
     // Coroutines test
@@ -92,4 +93,12 @@ dependencies {
     // Optional: Mockito for mocking
     testImplementation ("org.mockito:mockito-core:5.11.0")
     testImplementation(kotlin("test"))
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.arch.core:core-testing:2.2.0")
+    androidTestImplementation("androidx.room:room-testing:2.6.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+
 }

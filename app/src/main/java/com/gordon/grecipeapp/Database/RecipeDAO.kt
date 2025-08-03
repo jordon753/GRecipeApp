@@ -1,4 +1,4 @@
-package com.example.grecipeapp.Database
+package com.gordon.grecipeapp.Database
 
 import androidx.room.Dao
 import androidx.room.Delete

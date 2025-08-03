@@ -1,9 +1,9 @@
-package com.example.grecipeapp
+package com.gordon.grecipeapp
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.example.grecipeapp.Database.Recipe
+import com.gordon.grecipeapp.Database.Recipe
 import org.junit.Rule
 import org.junit.Test
 

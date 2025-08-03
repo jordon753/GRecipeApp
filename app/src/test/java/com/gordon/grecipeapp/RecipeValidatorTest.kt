@@ -1,4 +1,4 @@
-package com.example.grecipeapp
+package com.gordon.grecipeapp
 
 import org.junit.Assert.assertTrue
 import org.junit.Test

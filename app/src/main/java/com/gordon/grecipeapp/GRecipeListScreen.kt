@@ -1,4 +1,4 @@
-package com.example.grecipeapp
+package com.gordon.grecipeapp
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -30,11 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.grecipeapp.Database.GRecipeDatabase
-import com.example.grecipeapp.Database.Recipe
-import com.example.grecipeapp.Database.RecipeRepository
-import com.example.grecipeapp.Database.RecipeViewModel
-import com.example.grecipeapp.Database.RecipeViewModelFactory
+import com.gordon.grecipeapp.Database.GRecipeDatabase
+import com.gordon.grecipeapp.Database.Recipe
+import com.gordon.grecipeapp.Database.RecipeRepository
+import com.gordon.grecipeapp.Database.RecipeViewModel
+import com.gordon.grecipeapp.Database.RecipeViewModelFactory
 
 
 @OptIn(ExperimentalMaterial3Api::class)

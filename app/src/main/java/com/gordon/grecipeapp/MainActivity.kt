@@ -1,4 +1,4 @@
-package com.example.grecipeapp
+package com.gordon.grecipeapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,7 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.grecipeapp.ui.theme.GRecipeAppTheme
+import com.gordon.grecipeapp.ui.theme.GRecipeAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

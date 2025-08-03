@@ -1,4 +1,4 @@
-package com.example.grecipeapp.Database
+package com.gordon.grecipeapp.Database
 
 import android.content.Context
 import androidx.room.Database

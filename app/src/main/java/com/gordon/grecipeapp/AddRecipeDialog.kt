@@ -1,4 +1,4 @@
-package com.example.grecipeapp
+package com.gordon.grecipeapp
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column

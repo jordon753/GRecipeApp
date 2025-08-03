@@ -1,4 +1,4 @@
-package com.example.grecipeapp.ui.theme
+package com.gordon.grecipeapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

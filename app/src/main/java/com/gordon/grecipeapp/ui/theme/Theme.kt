@@ -1,6 +1,5 @@
-package com.example.grecipeapp.ui.theme
+package com.gordon.grecipeapp.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

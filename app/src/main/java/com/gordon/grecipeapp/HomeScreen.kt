@@ -1,4 +1,4 @@
-package com.example.grecipeapp
+package com.gordon.grecipeapp
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.grecipeapp.ui.theme.GRecipeAppTheme
+import com.gordon.grecipeapp.ui.theme.GRecipeAppTheme
 
 @Composable
 fun HomeScreen(onStartClick: () -> Unit) {

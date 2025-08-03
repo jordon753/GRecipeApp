@@ -1,4 +1,4 @@
-package com.example.grecipeapp.Database
+package com.gordon.grecipeapp.Database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

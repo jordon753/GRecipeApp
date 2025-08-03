@@ -1,4 +1,4 @@
-package com.example.grecipeapp
+package com.gordon.grecipeapp
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.grecipeapp.Database.Recipe
+import com.gordon.grecipeapp.Database.Recipe
 
 
 @OptIn(ExperimentalMaterial3Api::class)

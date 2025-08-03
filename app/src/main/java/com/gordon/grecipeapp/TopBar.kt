@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.example.grecipeapp
+package com.gordon.grecipeapp
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
